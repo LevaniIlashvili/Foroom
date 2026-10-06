@@ -9,10 +9,14 @@ import com.example.foroom.presentation.ui.activity.ForoomActivity
 import com.example.foroom.steps.HomeSteps
 import com.example.foroom.steps.LoginSteps
 import com.example.foroom.steps.RegistrationSteps
+import com.example.foroom.presentation.ui.util.datastore.user.ForoomUserDataStore
+import com.example.shared.util.runtime.user_token.UserTokenRuntimeHolder
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.GlobalContext
 import com.example.foroom.constants.*
 import java.time.LocalDateTime
 
@@ -30,10 +34,20 @@ class LoginAndRegistrationTests {
     fun tearDown() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
-        context.getSharedPreferences("foroom_training", Context.MODE_PRIVATE)
-            .edit()
-            .clear()
-            .commit()
+        val trainingPrefs = context.getSharedPreferences("foroom_training", Context.MODE_PRIVATE)
+        val sessionKeys = trainingPrefs.all.keys.filter { it.startsWith("session_") }
+        val editor = trainingPrefs.edit()
+        sessionKeys.forEach { editor.remove(it) }
+        editor.commit()
+
+        val koin = GlobalContext.getOrNull()
+        val userDataStore = koin?.getOrNull<ForoomUserDataStore>()
+        val tokens = koin?.getOrNull<UserTokenRuntimeHolder>()
+
+        runBlocking {
+            userDataStore?.clearUserData()
+            tokens?.setUserToken("")
+        }
     }
 
     @Test
