@@ -1,6 +1,7 @@
 package com.example.foroom.steps
 
 import com.example.foroom.Helper.input
+import com.example.foroom.Helper.tap
 import com.example.foroom.Helper.waitUntilVisible
 import com.example.foroom.pages.CreateChatPage
 import com.example.foroom.pages.HomePage
@@ -22,6 +23,12 @@ class HomeSteps {
 
     fun validateChatIsDisplayed(chatName: String): HomeSteps {
         homePage.getChatTitle(chatName).waitUntilVisible(5)
+
+        return this
+    }
+
+    fun openChat(chatName: String): HomeSteps {
+        homePage.getOpenChatBtn(chatName).tap()
 
         return this
     }
