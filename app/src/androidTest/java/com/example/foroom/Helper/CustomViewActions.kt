@@ -471,6 +471,21 @@ fun withIndex(matcher: Matcher<View>, index: Int): Matcher<View> {
     }
 }
 
+fun nthViewOfTypeIn(parentId: Int, type: Class<out View>, index: Int): Matcher<View> =
+    object : TypeSafeMatcher<View>() {
+        override fun describeTo(description: Description) {
+            description.appendText("is ${type.simpleName} #$index inside view with id $parentId")
+        }
+
+        override fun matchesSafely(view: View): Boolean {
+            if (!type.isInstance(view)) return false
+            val parent = view.rootView.findViewById<View>(parentId) ?: return false
+            val items = TreeIterables.breadthFirstViewTraversal(parent)
+                .filter { type.isInstance(it) }
+            return items.getOrNull(index) === view
+        }
+    }
+
 fun swipeLeftSlowly(): ViewAction {
     return GeneralSwipeAction(Swipe.SLOW, GeneralLocation.CENTER_RIGHT, GeneralLocation.CENTER_LEFT, Press.FINGER)
 }
